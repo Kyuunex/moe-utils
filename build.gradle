@@ -4,7 +4,7 @@ plugins {
 
 version = project.mod_version
 group = project.maven_group
-description = "Meteor Add-on designed for friends of CC."
+description = "Mapart utilities, featuring slimmed down edition of V's printer."
 
 configurations {
     implementation.extendsFrom(api)
