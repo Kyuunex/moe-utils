@@ -191,7 +191,7 @@ public class Printer extends Module {
     public Printer() {
         super(
             MoeUtils.CATEGORY,
-            "loli-printer",
+            "moe-printer",
             "Slimmed down version of V's printer. Places litematica schematics, designed for mapart."
         );
         PrinterUtils.PRINTER = this;
