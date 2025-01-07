@@ -21,7 +21,7 @@ jobs:
         with:
           repo_token: '${{ secrets.GITHUB_TOKEN }}'
           automatic_release_tag: devbuild-1.21.1
-          prerelease: true
+          prerelease: false
           title: Dev Build (1.21.1)
           files: |
             ./build/libs/*.jar
