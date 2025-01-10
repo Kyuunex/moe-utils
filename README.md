@@ -1,9 +1,10 @@
 # Moe Utils
 Mapart related utilities for Minecraft (as a Meteor Client Addon)
 
-### Versions
+### Versions (check branches)
 - 1.21.1
-- 1.20.6 (check branches)
+- 1.21
+- 1.20.6
 
 Get automatic builds [here](https://github.com/Kyuunex/moe-utils/releases)
 
