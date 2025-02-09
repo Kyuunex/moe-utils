@@ -267,7 +267,11 @@ public class BlockUtils {
                 LAST_TIMESTAMP = tickTimestamp;
                 mc.getNetworkHandler().sendPacket(
                     new PlayerMoveC2SPacket.LookAndOnGround(
-                        rot.getKey(), rot.getValue(), mc.player.isOnGround()));
+                        rot.getKey(),
+                        rot.getValue(),
+                        mc.player.isOnGround(), mc.player.horizontalCollision
+                    )
+                );
             }
 
             // mc.interactionManager.interactBlock(mc.player, hand, getBlockHitResult(false, pos,
@@ -284,7 +288,12 @@ public class BlockUtils {
                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
             }
             mc.getNetworkHandler().sendPacket(
-                new PlayerMoveC2SPacket.LookAndOnGround(rot.getKey(), rot.getValue(), mc.player.isOnGround())
+                new PlayerMoveC2SPacket.LookAndOnGround(
+                    rot.getKey(),
+                    rot.getValue(),
+                    mc.player.isOnGround(),
+                    mc.player.horizontalCollision
+                )
             );
             // mc.getNetworkHandler().sendPacket(new PlayerInteractBlockC2SPacket(hand, getBlockHitResult(true, pos, dir), 0));
             mc.interactionManager.interactBlock(
