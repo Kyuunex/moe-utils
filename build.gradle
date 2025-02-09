@@ -1,5 +1,5 @@
 plugins {
-    id "fabric-loom" version "1.8-SNAPSHOT"
+    id "fabric-loom" version "1.9-SNAPSHOT"
 }
 
 version = project.mod_version
@@ -37,7 +37,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // Meteor
-    modImplementation "meteordevelopment:meteor-client:${project.meteor_version}"
+    modImplementation "meteordevelopment:meteor-client:${project.minecraft_version}-SNAPSHOT"
     modImplementation "meteordevelopment:baritone:${project.minecraft_version}-SNAPSHOT"
 
     // Litematica
