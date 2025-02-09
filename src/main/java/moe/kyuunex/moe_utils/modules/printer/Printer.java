@@ -27,6 +27,8 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.*;
@@ -348,6 +350,34 @@ public class Printer extends Module {
                                 // Objects.requireNonNull(mc.getNetworkHandler()).sendPacket(
                                 //     new PickFromInventoryC2SPacket(itemResult.slot())
                                 // );
+
+                                mc.interactionManager.clickSlot(
+                                    mc.player.currentScreenHandler.syncId,
+                                    itemResult.slot(),
+                                    0,
+                                    SlotActionType.PICKUP,
+                                    mc.player
+                                );
+
+                                mc.interactionManager.clickSlot(
+                                    mc.player.currentScreenHandler.syncId,
+                                    itemResult.slot(),
+                                    0,
+                                    SlotActionType.PICKUP_ALL,
+                                    mc.player
+                                );
+
+//                                mc.interactionManager.clickSlot(
+//                                    mc.player.currentScreenHandler.syncId,
+//                                    InventoryUtils.findEmptySlotInHotbar(7),
+//                                    0,
+//                                    SlotActionType.PICKUP,
+//                                    mc.player
+//                                );
+
+                                Objects.requireNonNull(mc.getNetworkHandler()).sendPacket(
+                                    new CloseHandledScreenC2SPacket(mc.player.currentScreenHandler.syncId)
+                                );
                             }
 
                             break;
