@@ -14,7 +14,7 @@ import moe.kyuunex.moe_utils.modules.MapHighlighter;
 
 public class MoeUtils extends MeteorAddon {
     public static final Logger LOGGER = LoggerFactory.getLogger("Moe Utils");
-    public static final Category CATEGORY = new Category("FumoUtils");
+    public static final Category CATEGORY = new Category("MoeUtils");
 
     public static void postInit() {
         mc = MinecraftClient.getInstance();
