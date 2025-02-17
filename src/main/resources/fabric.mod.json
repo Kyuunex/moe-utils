@@ -19,6 +19,9 @@
       "moe.kyuunex.moe_utils.MoeUtils"
     ]
   },
+  "mixins": [
+    "litematica_moe-utils.mixins.json"
+  ],
   "accessWidener": "moe-utils.accesswidener",
   "custom": {
     "meteor-client:color": "225,25,25"
