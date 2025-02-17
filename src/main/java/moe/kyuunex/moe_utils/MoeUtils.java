@@ -6,6 +6,7 @@ import meteordevelopment.meteorclient.addons.GithubRepo;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.Category;
+import moe.kyuunex.moe_utils.modules.KeepSchematicLoaded;
 import net.minecraft.client.MinecraftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public class MoeUtils extends MeteorAddon {
         LOGGER.info("Moe Utils loading :3");
 
         Modules.get().add(new Printer());
+        Modules.get().add(new KeepSchematicLoaded());
         Modules.get().add(new MapHighlighter());
     }
 
