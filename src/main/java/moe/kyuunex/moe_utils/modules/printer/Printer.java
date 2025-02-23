@@ -346,37 +346,15 @@ public class Printer extends Module {
                             if (itemResult.isHotbar()) {
                                 InventoryUtils.swapSlot(itemResult.slot(), false);
                             } else {
-                                // InventoryUtils.swapSlot(InventoryUtils.findEmptySlotInHotbar(7), false);
-                                // Objects.requireNonNull(mc.getNetworkHandler()).sendPacket(
-                                //     new PickFromInventoryC2SPacket(itemResult.slot())
-                                // );
+                                int emptySlot = InventoryUtils.findEmptySlotInHotbar(7);
+                                InventoryUtils.swapSlot(emptySlot, false);
 
                                 mc.interactionManager.clickSlot(
                                     mc.player.currentScreenHandler.syncId,
                                     itemResult.slot(),
-                                    0,
-                                    SlotActionType.PICKUP,
+                                    emptySlot,
+                                    SlotActionType.SWAP,
                                     mc.player
-                                );
-
-                                mc.interactionManager.clickSlot(
-                                    mc.player.currentScreenHandler.syncId,
-                                    itemResult.slot(),
-                                    0,
-                                    SlotActionType.PICKUP_ALL,
-                                    mc.player
-                                );
-
-//                                mc.interactionManager.clickSlot(
-//                                    mc.player.currentScreenHandler.syncId,
-//                                    InventoryUtils.findEmptySlotInHotbar(7),
-//                                    0,
-//                                    SlotActionType.PICKUP,
-//                                    mc.player
-//                                );
-
-                                Objects.requireNonNull(mc.getNetworkHandler()).sendPacket(
-                                    new CloseHandledScreenC2SPacket(mc.player.currentScreenHandler.syncId)
                                 );
                             }
 
