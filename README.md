@@ -2,7 +2,7 @@
 Mapart related utilities for Minecraft (as a Meteor Client Addon)
 
 ### Versions (check branches)
-- 1.21.4 (experimental, has known issues, will break when ur hotbar is full.)
+- 1.21.4
 - 1.21.3
 - 1.21.1
 - 1.21
@@ -18,7 +18,8 @@ Get automatic builds [here](https://github.com/Kyuunex/moe-utils/releases)
 ### Note
 The printer is an older version and is stripped down to basics. No movement logic. Don't ask for support.  
 Also, if the server checks rotations (e.g. with Grim), you're gonna have a bad time. 
-I maintain this printer with const/9b in mind.
+I maintain this printer with const/9b in mind.  
+Some servers also may have strict checks with inventory stuff.
 
 ### Required mods
 + Litematica
