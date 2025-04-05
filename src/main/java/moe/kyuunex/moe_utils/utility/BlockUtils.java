@@ -34,6 +34,13 @@ public class BlockUtils {
         return Direction.values();
     }
 
+    public static boolean shouldAirPlace(BlockPos pos) {
+        for (Direction direction : getDirections()) {
+            if (!BlockUtils.isReplaceable(pos.offset(direction))) return false;
+        }
+        return true;
+    }
+
     public static boolean isReplaceable(BlockPos pos) {
         return mc.player != null && mc.player.getWorld().getBlockState(pos).isAir()
             || mc.player.getWorld().getBlockState(pos).isReplaceable()
@@ -66,7 +73,7 @@ public class BlockUtils {
                         return entity.collidesWithStateAtPos(pos, Blocks.BEDROCK.getDefaultState());
                     });
 
-        return isReplaceable(pos) && entities.isEmpty();
+        return isReplaceable(pos) && entities.isEmpty() && !shouldAirPlace(pos);
     }
 
     public static Direction getPlaceDirection(BlockPos pos) {
@@ -190,6 +197,10 @@ public class BlockUtils {
             (double) pos.getZ() + ((double) getPlaceDirection(pos).getOffsetZ() * 0.5));
     }
 
+    public static Vec3d clickOffset(BlockPos pos, Direction direction) {
+        return Vec3d.ofCenter(pos).add(direction.getOffsetX() * 0.5, direction.getOffsetY() * 0.5, direction.getOffsetZ() * 0.5);
+    }
+
     public static BlockHitResult getBlockHitResult(
         boolean raytrace, BlockPos pos, Direction direction) {
         if (raytrace) {
@@ -223,12 +234,60 @@ public class BlockUtils {
             false);
     }
 
+    public static double getHeight(BlockPos pos) {
+        return mc.player.clientWorld.getBlockState(pos).getCollisionShape(mc.player.clientWorld, pos).getMax(Direction.Axis.Y);
+    }
+
+    public static BlockHitResult getSafeHitResult(BlockPos pos) {
+        BlockPos.Mutable mutable = pos.mutableCopy();
+        Direction direction = Direction.UP;
+
+        Vec3d offset;
+        double yHeight = 0;
+
+        for (Direction dir : getDirections()) {
+            // Performance!
+            mutable.set(pos.getX() + dir.getOffsetX(), pos.getY() + dir.getOffsetY(), pos.getZ() + dir.getOffsetZ());
+            if (!isReplaceable(mutable)) {
+                yHeight = getHeight(mutable);
+
+                direction = dir;
+
+                if (dir == Direction.DOWN) {
+                    break;
+                }
+            }
+        }
+
+        offset = clickOffset(pos, direction);
+
+        if (yHeight <= 0.6) {
+            // Don't ask why, know it works.
+            offset = new Vec3d(offset.x, Math.floor(offset.y) + 0.0154, offset.z);
+        }
+
+        return new BlockHitResult(offset, direction.getOpposite(), mutable.set(pos.getX() + direction.getOffsetX(), pos.getY() + direction.getOffsetY(), pos.getZ() + direction.getOffsetZ()), false);
+    }
+
     public static boolean placeBlock(
         Hand hand, FindItemResult itemResult, BlockPos pos, long tickTimestamp) {
         assert mc.player != null : "Player has not joined the game.";
         assert mc.interactionManager != null : "Interaction Manager is not defined.";
         assert mc.getNetworkHandler() != null : "Network Handler is not defined.";
         assert mc.world != null : "The world is null.";
+
+        if (PrinterUtils.PRINTER.iHateGrim.get()) {
+            if (BlockUtils.isReplaceable(pos)) {
+                if (!mc.player.handSwinging) {
+                    mc.player.swingHand(hand);
+                }
+
+                mc.interactionManager.interactBlock(mc.player, hand, BlockUtils.getSafeHitResult(pos));
+                return true;
+            }
+
+            return false;
+        }
 
         Direction dir = getPlaceDirection(pos);
 

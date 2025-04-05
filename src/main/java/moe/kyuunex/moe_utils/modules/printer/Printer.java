@@ -27,7 +27,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Pair;
@@ -79,11 +78,20 @@ public class Printer extends Module {
                 .defaultValue(20)
                 .sliderRange(10, 80)
                 .build());
+    // Grim makes me go loony -V
+    public final Setting<Boolean> iHateGrim =
+        sgDefault.add(
+            new BoolSetting.Builder()
+                .name("9b9t")
+                .description("Uses 9b9t specific placing.")
+                .defaultValue(false)
+                .build());
     public final Setting<Boolean> raytraceCarpet =
         sgDefault.add(
             new BoolSetting.Builder()
                 .name("raytrace-carpet")
                 .description("Raytracing for carpet, is likely not needed and will decrease speed.")
+                .visible(() -> !iHateGrim.get())
                 .defaultValue(false)
                 .build());
     public final Setting<Boolean> raytraceFull =
@@ -91,6 +99,7 @@ public class Printer extends Module {
             new BoolSetting.Builder()
                 .name("raytrace-full")
                 .description("Raytracing for full-blocks, not required on grim.")
+                .visible(() -> !iHateGrim.get())
                 .defaultValue(true)
                 .build());
     public final Setting<SortAlgorithm> firstAlgorithm =
@@ -276,15 +285,19 @@ public class Printer extends Module {
                         .intersects(Vec3d.of(pos), Vec3d.of(pos).add(1, 1, 1))) {
 
                         if ((containedBlocks.contains(required.getBlock().asItem()))) {
-                            boolean isCarpet =
-                                required.getBlock().asItem().getTranslationKey().endsWith("carpet");
-                            if (isCarpet) {
+                            if (iHateGrim.get()) {
                                 toSort.add(new BlockPos(pos));
                             } else {
-                                Map.Entry<Float, Float> rot = BlockUtils.getRotation(true, pos);
-
-                                if (BlockUtils.canRaycast(pos, rot.getValue(), rot.getKey())) {
+                                boolean isCarpet =
+                                    required.getBlock().asItem().getTranslationKey().endsWith("carpet");
+                                if (isCarpet) {
                                     toSort.add(new BlockPos(pos));
+                                } else {
+                                    Map.Entry<Float, Float> rot = BlockUtils.getRotation(true, pos);
+
+                                    if (BlockUtils.canRaycast(pos, rot.getValue(), rot.getKey())) {
+                                        toSort.add(new BlockPos(pos));
+                                    }
                                 }
                             }
                         }
