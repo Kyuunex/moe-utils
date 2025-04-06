@@ -54,6 +54,14 @@ public class Printer extends Module {
                 .defaultValue(3)
                 .sliderRange(1, 5)
                 .build());
+    public final Setting<Double> placeDistance =
+        sgDefault.add(
+            new DoubleSetting.Builder()
+                .name("place-distance")
+                .description("The max distance to place blocks.")
+                .defaultValue(3.75)
+                .sliderRange(3.2, 5.0)
+                .build());
     public final Setting<Integer> delay =
         sgDefault.add(
             new IntSetting.Builder()
@@ -374,7 +382,7 @@ public class Printer extends Module {
                             break;
                         }
 
-                        if (BlockUtils.canPlace(pos)) {
+                        if (BlockUtils.canPlace(pos, placeDistance.get())) {
                             if (BlockUtils.placeBlock(hand, itemResult, pos, tickTimestamp)) {
                                 if (placeFading.stream().noneMatch((pair) -> pair.getRight().equals(pos)))
                                     placeFading.add(

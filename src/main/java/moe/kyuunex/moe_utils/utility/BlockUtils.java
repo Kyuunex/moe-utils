@@ -56,7 +56,7 @@ public class BlockUtils {
         return mc.player == null || !mc.player.getWorld().getBlockState(pos).isAir();
     }
 
-    public static boolean canPlace(BlockPos pos) {
+    public static boolean canPlace(BlockPos pos, double dist) {
         assert mc.player != null;
 
         List<Entity> entities =
@@ -73,7 +73,8 @@ public class BlockUtils {
                         return entity.collidesWithStateAtPos(pos, Blocks.BEDROCK.getDefaultState());
                     });
 
-        return isReplaceable(pos) && entities.isEmpty() && !shouldAirPlace(pos);
+        // Distance check needs improvement maybe ?
+        return isReplaceable(pos) && entities.isEmpty() && !shouldAirPlace(pos) && mc.player.getEyePos().isInRange(getSafeHitResult(pos).getPos(), dist);
     }
 
     public static Direction getPlaceDirection(BlockPos pos) {
