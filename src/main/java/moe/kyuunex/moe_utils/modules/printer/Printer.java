@@ -36,7 +36,6 @@ import moe.kyuunex.moe_utils.utility.*;
 
 public class Printer extends Module {
     // Variables
-    public static BlockPos anchoringTo;
     private final SettingGroup sgDefault = settings.getDefaultGroup();
     public final Setting<Integer> swapDelay =
         sgDefault.add(
@@ -223,7 +222,6 @@ public class Printer extends Module {
     public void onDeactivate() {
         placeFading.clear();
         toSort.clear();
-        anchoringTo = null;
         mc.options.forwardKey.setPressed(false);
     }
 
@@ -329,11 +327,6 @@ public class Printer extends Module {
                         if (Modules.get().get(AutoEat.class).eating
                             || Modules.get().get(AutoGap.class).isEating()
                             || Modules.get().get(KillAura.class).getTarget() != null) {
-                            MoeUtils.LOGGER.info(
-                                "Auto Eating: {}, Auto Gap Eating: {}, Kill Aura Target: {}",
-                                Modules.get().get(AutoEat.class).eating,
-                                Modules.get().get(AutoGap.class).isEating(),
-                                Modules.get().get(KillAura.class).getTarget() != null);
                             break;
                         }
 
@@ -504,8 +497,6 @@ public class Printer extends Module {
     @SuppressWarnings("unused")
     public enum SortAlgorithm {
         None(false, (a, b) -> 0),
-        TopDown(true, Comparator.comparingInt(value -> -value.getY())),
-        DownTop(true, Comparator.comparingInt(Vec3i::getY)),
         Closest(
             false,
             Comparator.comparingDouble(
@@ -515,19 +506,6 @@ public class Printer extends Module {
                         MeteorClient.mc.player.getX(),
                         MeteorClient.mc.player.getY(),
                         MeteorClient.mc.player.getZ(),
-                        value.getX() + 0.5,
-                        value.getY() + 0.5,
-                        value.getZ() + 0.5)
-                        : 0)),
-        ClosestToLastBlock(
-            false,
-            Comparator.comparingDouble(
-                value ->
-                    MeteorClient.mc.player != null
-                        ? Utils.squaredDistance(
-                        anchoringTo != null ? anchoringTo.getX() : MeteorClient.mc.player.getX(),
-                        anchoringTo != null ? anchoringTo.getY() : MeteorClient.mc.player.getY(),
-                        anchoringTo != null ? anchoringTo.getZ() : MeteorClient.mc.player.getZ(),
                         value.getX() + 0.5,
                         value.getY() + 0.5,
                         value.getZ() + 0.5)
