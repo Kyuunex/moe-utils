@@ -15,6 +15,9 @@ Get automatic builds [here](https://github.com/Kyuunex/moe-utils/releases)
 + Map area highlighter. 
 + Keep Schematic Loaded. Prevents Litematica from unloading the parts of the schematic when you are too far away.
 
+### Commands
++ `quicksave-map` quickly saves a map you are holding, locally.
+
 ### Note
 The printer is an older version and is stripped down to basics. No movement logic. Don't ask for support.  
 Also, if the server checks rotations (e.g. with Grim), you're gonna have a bad time. 

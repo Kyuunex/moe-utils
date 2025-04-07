@@ -4,8 +4,10 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 import meteordevelopment.meteorclient.addons.GithubRepo;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
+import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.Category;
+import moe.kyuunex.moe_utils.commands.QuicksaveMapart;
 import moe.kyuunex.moe_utils.modules.KeepSchematicLoaded;
 import net.minecraft.client.MinecraftClient;
 import org.slf4j.Logger;
@@ -28,6 +30,8 @@ public class MoeUtils extends MeteorAddon {
         Modules.get().add(new Printer());
         Modules.get().add(new KeepSchematicLoaded());
         Modules.get().add(new MapHighlighter());
+
+        Commands.add(new QuicksaveMapart());
     }
 
     @Override
