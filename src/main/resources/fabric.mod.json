@@ -3,7 +3,7 @@
   "id": "moe-utils",
   "version": "${version}",
   "name": "MoeUtils",
-  "description": "${description}",
+  "description": "Mapart utilities, featuring slimmed down edition of V's printer.",
   "authors": [
     "loli-tummy",
     "Kyuunex"
