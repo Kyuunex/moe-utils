@@ -9,7 +9,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import moe.kyuunex.moe_utils.commands.QuicksaveMapart;
 import moe.kyuunex.moe_utils.modules.KeepSchematicLoaded;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import moe.kyuunex.moe_utils.modules.printer.Printer;
@@ -20,7 +20,7 @@ public class MoeUtils extends MeteorAddon {
     public static final Category CATEGORY = new Category("MoeUtils");
 
     public static void postInit() {
-        mc = MinecraftClient.getInstance();
+        mc = Minecraft.getInstance();
     }
 
     @Override

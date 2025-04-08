@@ -24,13 +24,14 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.util.Tuple;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import moe.kyuunex.moe_utils.MoeUtils;
 import moe.kyuunex.moe_utils.utility.*;
 
@@ -194,7 +195,7 @@ public class Printer extends Module {
     private final List<BlockPos> toSort = new ArrayList<>();
     private final List<Item> containedBlocks = new ArrayList<>();
     // Render
-    private final List<Pair<RenderWrap, BlockPos>> placeFading = new ArrayList<>();
+    private final List<Tuple<RenderWrap, BlockPos>> placeFading = new ArrayList<>();
     protected double renderOffset = 0;
     protected boolean isGoingUp = true;
     // Sleeping
@@ -222,12 +223,12 @@ public class Printer extends Module {
     public void onDeactivate() {
         placeFading.clear();
         toSort.clear();
-        mc.options.forwardKey.setPressed(false);
+        mc.options.keyUp.setDown(false);
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.player == null || mc.world == null || mc.interactionManager == null) {
+        if (mc.player == null || mc.level == null || mc.gameMode == null) {
             placeFading.clear();
             return;
         }
@@ -253,7 +254,7 @@ public class Printer extends Module {
 
         containedBlocks.clear();
 
-        for (ItemStack stack : mc.player.getInventory().main) {
+        for (ItemStack stack : mc.player.getInventory().items) {
             if (InventoryUtils.IS_BLOCK.test(stack)) {
                 containedBlocks.add(stack.getItem());
             }
@@ -262,13 +263,13 @@ public class Printer extends Module {
         placeFading.forEach(
             s -> {
                 if (renderModePlacing.get() == RenderMode.Breath) {
-                    s.getLeft().breath(s.getLeft().breath() - 1);
+                    s.getA().breath(s.getA().breath() - 1);
                 } else {
-                    s.getLeft().fadeTime(s.getLeft().fadeTime() - 1);
+                    s.getA().fadeTime(s.getA().fadeTime() - 1);
                 }
             });
         placeFading.removeIf(
-            s -> s.getLeft().fadeTime() <= 0 || s.getLeft().breath() * contraction.get() <= -1);
+            s -> s.getA().fadeTime() <= 0 || s.getA().breath() * contraction.get() <= -1);
 
         toSort.clear();
 
@@ -281,21 +282,21 @@ public class Printer extends Module {
                 (pos, blockState) -> {
                     BlockState required = worldSchematic.getBlockState(pos);
 
-                    if (mc.player.getBlockPos().isWithinDistance(pos, range.get())
-                        && blockState.isReplaceable()
+                    if (mc.player.blockPosition().closerThan(pos, range.get())
+                        && blockState.canBeReplaced()
                         && !required.isAir()
                         && blockState.getBlock() != required.getBlock()
                         && DataManager.getRenderLayerRange().isPositionWithinRange(pos)
                         && !mc.player
                         .getBoundingBox()
-                        .intersects(Vec3d.of(pos), Vec3d.of(pos).add(1, 1, 1))) {
+                        .intersects(Vec3.atLowerCornerOf(pos), Vec3.atLowerCornerOf(pos).add(1, 1, 1))) {
 
                         if ((containedBlocks.contains(required.getBlock().asItem()))) {
                             if (iHateGrim.get()) {
                                 toSort.add(new BlockPos(pos));
                             } else {
                                 boolean isCarpet =
-                                    required.getBlock().asItem().getTranslationKey().endsWith("carpet");
+                                    required.getBlock().asItem().getDescriptionId().endsWith("carpet"); // wait, so this only works in English?
                                 if (isCarpet) {
                                     toSort.add(new BlockPos(pos));
                                 } else {
@@ -334,7 +335,7 @@ public class Printer extends Module {
                             || placed >= blocksPerTick.get()
                             || blocksPlacedThisSec >= blocksPerSec.get()) break;
 
-                        if (!mc.player.getBlockPos().isWithinDistance(pos, range.get())) continue;
+                        if (!mc.player.blockPosition().closerThan(pos, range.get())) continue;
 
                         BlockState state = worldSchematic.getBlockState(pos);
                         Item item = state.getBlock().asItem();
@@ -345,17 +346,17 @@ public class Printer extends Module {
 
                         if (!itemResult.found()) continue;
 
-                        Hand hand = Hand.MAIN_HAND;
+                        InteractionHand hand = InteractionHand.MAIN_HAND;
 
-                        if (itemResult.isOffhand()) hand = Hand.OFF_HAND;
+                        if (itemResult.isOffhand()) hand = InteractionHand.OFF_HAND;
 
                         if (swapTimer > 0) {
                             swapTimer--;
                             break;
                         }
 
-                        if (((mc.player.getInventory().getMainHandStack().getItem() != item))
-                            && hand != Hand.OFF_HAND) {
+                        if (((mc.player.getInventory().getSelected().getItem() != item))
+                            && hand != InteractionHand.OFF_HAND) {
                             swapTimer = swapDelay.get();
                             if (itemResult.isHotbar()) {
                                 InventoryUtils.swapSlot(itemResult.slot(), false);
@@ -363,11 +364,11 @@ public class Printer extends Module {
                                 int emptySlot = InventoryUtils.findEmptySlotInHotbar(7);
                                 InventoryUtils.swapSlot(emptySlot, false);
 
-                                mc.interactionManager.clickSlot(
-                                    mc.player.currentScreenHandler.syncId,
+                                mc.gameMode.handleInventoryMouseClick(
+                                    mc.player.containerMenu.containerId,
                                     itemResult.slot(),
                                     emptySlot,
-                                    SlotActionType.SWAP,
+                                    ClickType.SWAP,
                                     mc.player
                                 );
                             }
@@ -377,9 +378,9 @@ public class Printer extends Module {
 
                         if (BlockUtils.canPlace(pos, placeDistance.get())) {
                             if (BlockUtils.placeBlock(hand, itemResult, pos, tickTimestamp)) {
-                                if (placeFading.stream().noneMatch((pair) -> pair.getRight().equals(pos)))
+                                if (placeFading.stream().noneMatch((pair) -> pair.getB().equals(pos)))
                                     placeFading.add(
-                                        new Pair<>(new RenderWrap(fadeTime.get(), 0), new BlockPos(pos)));
+                                        new Tuple<>(new RenderWrap(fadeTime.get(), 0), new BlockPos(pos)));
                                 placeTimer = 0;
                                 placed++;
                                 blocksPlacedThisSec++;
@@ -399,15 +400,15 @@ public class Printer extends Module {
             s ->
                 renderBlock(
                     event.renderer,
-                    s.getRight().getX(),
-                    s.getRight().getY(),
-                    s.getRight().getZ(),
-                    s.getRight().getX() + 1,
-                    s.getRight().getY() + 1,
-                    s.getRight().getZ() + 1,
+                    s.getB().getX(),
+                    s.getB().getY(),
+                    s.getB().getZ(),
+                    s.getB().getX() + 1,
+                    s.getB().getY() + 1,
+                    s.getB().getZ() + 1,
                     RenderType.Placing,
                     renderModePlacing.get(),
-                    s.getLeft().breath()));
+                    s.getA().breath()));
     }
 
     public void renderingTick() {

@@ -4,12 +4,12 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.block.MapColor;
-import net.minecraft.command.CommandSource;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.FilledMapItem;
-import net.minecraft.item.Items;
-import net.minecraft.item.map.MapState;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -33,31 +33,32 @@ public class QuicksaveMapart extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.executes(this::quickSave);
     }
 
-    private int quickSave(CommandContext<CommandSource> context) {
+    private int quickSave(CommandContext<SharedSuggestionProvider> context) {
         if (mc.player == null) return -1;
-        if (mc.player.getMainHandStack().getItem() != Items.FILLED_MAP) return -1;
+        if (mc.level == null) return -1;
+        if (mc.player.getMainHandItem().getItem() != Items.FILLED_MAP) return -1;
 
-        int mapId = mc.player.getMainHandStack().get(DataComponentTypes.MAP_ID).id();
+        int mapId = mc.player.getMainHandItem().get(DataComponents.MAP_ID).id();
 
-        MapState mapState = FilledMapItem.getMapState(mc.player.getMainHandStack(), mc.world);
+        MapItemSavedData mapState = MapItem.getSavedData(mc.player.getMainHandItem(), mc.level);
 
         BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_RGB);
 
         for (int i = 0; i < 128; ++i) {
             for (int j = 0; j < 128; ++j) {
                 int k = j + i * 128;
-                image.setRGB(j, i, MapColor.getRenderColor(Objects.requireNonNull(mapState).colors[k]));
+                image.setRGB(j, i, MapColor.getColorFromPackedId(Objects.requireNonNull(mapState).colors[k]));
             }
         }
 
         Path outputPath = mapPath.resolve(
             mapId + "_"
-                + (mc.getCurrentServerEntry() != null && !mc.isInSingleplayer()
-                ? mc.getCurrentServerEntry().address
+                + (mc.getCurrentServer() != null && !mc.isLocalServer()
+                ? mc.getCurrentServer().ip
                 : "OFFLINE")
                 + "_single"
                 + ".png");
