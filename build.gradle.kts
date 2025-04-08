@@ -18,10 +18,8 @@ repositories {
         url = uri("https://maven.meteordev.org/snapshots")
     }
     maven {
-        url = uri("https://www.cursemaven.com")
-    }
-    maven {
-        url = uri("https://masa.dy.fi/maven")
+        name = "Modrinth"
+        url = uri("https://api.modrinth.com/maven")
     }
 }
 
@@ -36,8 +34,8 @@ dependencies {
     modImplementation("meteordevelopment:baritone:${properties["minecraft_version"] as String}-SNAPSHOT")
 
     // Litematica
-    modImplementation("curse.maven:litematica-${properties["litematica_projectid"] as String}:${properties["litematica_fileid"] as String}")
-    modImplementation("curse.maven:malilib-${properties["malilib_projectid"] as String}:${properties["malilib_fileid"] as String}")
+    modImplementation("maven.modrinth:litematica:${properties["litematica_version"] as String}-fabric,${properties["minecraft_version"] as String}")
+    modImplementation("maven.modrinth:malilib:${properties["malilib_version"] as String}-fabric,${properties["minecraft_version"] as String}")
 }
 
 tasks {
