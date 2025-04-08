@@ -6,11 +6,11 @@
   "description": "${description}",
   "authors": [
     "loli-tummy",
-    "kyuunex"
+    "Kyuunex"
   ],
   "contact": {
-    "email": "",
-    "repo": "https://github.com/kyuunex/moe-utils"
+    "email": "kyuunex@protonmail.ch",
+    "repo": "https://github.com/Kyuunex/moe-utils"
   },
   "icon": "assets/moe-utils/icon.png",
   "environment": "client",
@@ -22,7 +22,6 @@
   "mixins": [
     "litematica_moe-utils.mixins.json"
   ],
-  "accessWidener": "moe-utils.accesswidener",
   "custom": {
     "meteor-client:color": "225,25,25"
   },

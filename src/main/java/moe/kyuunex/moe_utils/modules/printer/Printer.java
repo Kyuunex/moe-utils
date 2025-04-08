@@ -296,7 +296,7 @@ public class Printer extends Module {
                                 toSort.add(new BlockPos(pos));
                             } else {
                                 boolean isCarpet =
-                                    required.getBlock().asItem().getDescriptionId().endsWith("carpet"); // wait, so this only works in English?
+                                    required.getBlock().asItem().getDescriptionId().endsWith("carpet"); // TODO: This probably only works in English. fix later
                                 if (isCarpet) {
                                     toSort.add(new BlockPos(pos));
                                 } else {

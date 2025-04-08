@@ -303,7 +303,7 @@ public class BlockUtils {
                 .getItem(itemResult.slot())
                 .getItem()
                 .getDescriptionId()
-                .endsWith("carpet"); // English only????
+                .endsWith("carpet"); // TODO: This probably only works in English. fix later
 
         if (isCarpet && !PrinterUtils.PRINTER.raytraceCarpet.get()) {
             dir = Direction.UP;

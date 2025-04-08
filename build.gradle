@@ -1,5 +1,5 @@
 plugins {
-    id "fabric-loom" version "1.9-SNAPSHOT"
+    id "fabric-loom" version "1.10-SNAPSHOT"
 }
 
 version = project.mod_version
@@ -43,10 +43,6 @@ dependencies {
     // Litematica
     modImplementation "curse.maven:litematica-${project.litematica_projectid}:${project.litematica_fileid}"
     modImplementation "curse.maven:malilib-${project.malilib_projectid}:${project.malilib_fileid}"
-}
-
-loom {
-    accessWidenerPath = file("src/main/resources/moe-utils.accesswidener")
 }
 
 processResources {
