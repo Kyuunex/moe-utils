@@ -8,9 +8,9 @@ import baritone.api.utils.RotationUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
-import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -19,6 +19,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.network.protocol.game.ServerboundSwingPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.core.BlockPos;
@@ -36,7 +37,7 @@ public class BlockUtils {
 
     public static boolean shouldAirPlace(BlockPos pos) {
         for (Direction direction : getDirections()) {
-            if (!BlockUtils.isReplaceable(pos.relative(direction))) return false;
+            if (!isReplaceable(pos.relative(direction))) return false;
         }
         return true;
     }
@@ -276,19 +277,20 @@ public class BlockUtils {
     }
 
     public static boolean placeBlock(
-        InteractionHand hand, FindItemResult itemResult, BlockPos pos, long tickTimestamp) {
+        InteractionHand hand, BlockPos pos, long tickTimestamp) {
         assert mc.player != null : "Player has not joined the game.";
-        assert mc.gameMode != null : "Interaction Manager is not defined.";
-        assert mc.getConnection() != null : "Network Handler is not defined.";
-        assert mc.level != null : "The world is null.";
+        assert mc.gameMode != null : "Somethings wrong here and it really shouldn't be.";
+        assert mc.getConnection() != null : "Somethings wrong here and it really shouldn't be. x2";
+        assert mc.level != null : "The world hasn't loaded yet.";
 
         if (PrinterUtils.PRINTER.iHateGrim.get()) {
-            if (BlockUtils.isReplaceable(pos)) {
-                if (!mc.player.swinging) {
-                    mc.player.swing(hand);
-                }
-
-                mc.gameMode.useItemOn(mc.player, hand, BlockUtils.getSafeHitResult(pos));
+            if (isReplaceable(pos)) {
+                mc.getConnection().getConnection().send(
+                    new ServerboundSwingPacket(hand),
+                    null,
+                    true
+                );
+                mc.gameMode.useItemOn(mc.player, hand, getSafeHitResult(pos));
                 return true;
             }
 
@@ -297,21 +299,16 @@ public class BlockUtils {
 
         Direction dir = getPlaceDirection(pos);
 
-        boolean isCarpet =
-            mc.player
-                .getInventory()
-                .getItem(itemResult.slot())
-                .getItem()
-                .getDescriptionId()
-                .endsWith("carpet"); // TODO: This probably only works in English. fix later
+        boolean isPartialBlock = getHeight(pos) < 0.6;
 
-        if (isCarpet && !PrinterUtils.PRINTER.raytraceCarpet.get()) {
+        if (isPartialBlock && !PrinterUtils.PRINTER.raytracePartial.get()) {
             dir = Direction.UP;
             Map.Entry<Float, Float> rot = getRotation(false, pos);
 
             BlockPos offsetPos = pos.below();
 
-            if (BlockUtils.isReplaceable(offsetPos)) {
+            // Should work?
+            if (mc.level.getFluidState(offsetPos).is(Fluids.WATER) && !isLiquid(offsetPos)) {
                 Block block = mc.level.getBlockState(offsetPos).getBlock();
                 if (block == Blocks.KELP
                     || block == Blocks.KELP_PLANT
@@ -319,18 +316,17 @@ public class BlockUtils {
                     || block == Blocks.SEAGRASS) {
                     mc.gameMode.startDestroyBlock(offsetPos, dir);
                 } else if (mc.level.getBlockState(offsetPos).getBlock() == Blocks.BUBBLE_COLUMN) {
+                    mc.getConnection().getConnection().send(
+                        new ServerboundSwingPacket(hand),
+                        null,
+                        true
+                    );
                     mc.gameMode.useItemOn(
                         mc.player, hand, getBlockHitResult(false, offsetPos, dir));
                 } else {
                     return false;
                 }
             }
-
-            if (!mc.player.swinging) mc.getConnection().getConnection().send(
-                new ServerboundSwingPacket(hand),
-                null,
-                true
-            );
 
             if (tickTimestamp == -1 || tickTimestamp != LAST_TIMESTAMP) {
                 LAST_TIMESTAMP = tickTimestamp;
@@ -346,7 +342,11 @@ public class BlockUtils {
             }
 
             // mc.gameMode.useItemOn(mc.player, hand, getBlockHitResult(false, pos, getPlaceDirection(pos)));
-
+            mc.getConnection().getConnection().send(
+                new ServerboundSwingPacket(hand),
+                null,
+                true
+            );
             mc.gameMode.useItemOn(mc.player, hand, getBlockHitResult(false, pos, dir));
             return true;
         }
@@ -354,9 +354,6 @@ public class BlockUtils {
         Map.Entry<Float, Float> rot = getRotation(true, pos);
 
         if (canRaycast(pos, rot.getValue(), rot.getKey()) || !PrinterUtils.PRINTER.raytraceFull.get()) {
-            if (!mc.player.swinging) {
-                mc.getConnection().getConnection().send(new ServerboundSwingPacket(hand), null, true);
-            }
             mc.getConnection().getConnection().send(
                 new ServerboundMovePlayerPacket.Rot(
                     rot.getKey(),
@@ -368,8 +365,13 @@ public class BlockUtils {
                 true
             );
             // mc.getConnection().getConnection().send(new PlayerInteractBlockC2SPacket(hand, getBlockHitResult(true, pos, dir), 0), null, true);
+            mc.getConnection().getConnection().send(
+                new ServerboundSwingPacket(hand),
+                null,
+                true
+            );
             mc.gameMode.useItemOn(
-                mc.player, hand, getBlockHitResult(PrinterUtils.PRINTER.raytraceFull.get(), pos, dir));
+                mc.player, hand, Objects.requireNonNull(getBlockHitResult(PrinterUtils.PRINTER.raytraceFull.get(), pos, dir)));
             return true;
         }
 

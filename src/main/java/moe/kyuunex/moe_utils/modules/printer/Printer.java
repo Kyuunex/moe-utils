@@ -43,8 +43,8 @@ public class Printer extends Module {
             new IntSetting.Builder()
                 .name("switch-delay")
                 .description("How long to wait before placing after switching.")
-                .defaultValue(4)
-                .sliderRange(2, 10)
+                .defaultValue(8)
+                .sliderRange(0, 20)
                 .build());
     public final Setting<Integer> range =
         sgDefault.add(
@@ -94,11 +94,11 @@ public class Printer extends Module {
                 .description("Uses 9b9t specific placing.")
                 .defaultValue(false)
                 .build());
-    public final Setting<Boolean> raytraceCarpet =
+    public final Setting<Boolean> raytracePartial =
         sgDefault.add(
             new BoolSetting.Builder()
-                .name("raytrace-carpet")
-                .description("Raytracing for carpet, is likely not needed and will decrease speed.")
+                .name("raytrace-partial")
+                .description("Raytracing for partial blocks (slabs, carpet, trapdoors, ect), is likely not needed and will decrease speed.")
                 .visible(() -> !iHateGrim.get())
                 .defaultValue(false)
                 .build());
@@ -295,9 +295,9 @@ public class Printer extends Module {
                             if (iHateGrim.get()) {
                                 toSort.add(new BlockPos(pos));
                             } else {
-                                boolean isCarpet =
-                                    required.getBlock().asItem().getDescriptionId().endsWith("carpet"); // TODO: This probably only works in English. fix later
-                                if (isCarpet) {
+                                boolean isPartialBlock = BlockUtils.getHeight(pos) < 0.6;
+
+                                if (isPartialBlock && !raytracePartial.get()) {
                                     toSort.add(new BlockPos(pos));
                                 } else {
                                     Map.Entry<Float, Float> rot = BlockUtils.getRotation(true, pos);
@@ -377,7 +377,7 @@ public class Printer extends Module {
                         }
 
                         if (BlockUtils.canPlace(pos, placeDistance.get())) {
-                            if (BlockUtils.placeBlock(hand, itemResult, pos, tickTimestamp)) {
+                            if (BlockUtils.placeBlock(hand, pos, tickTimestamp)) {
                                 if (placeFading.stream().noneMatch((pair) -> pair.getB().equals(pos)))
                                     placeFading.add(
                                         new Tuple<>(new RenderWrap(fadeTime.get(), 0), new BlockPos(pos)));
