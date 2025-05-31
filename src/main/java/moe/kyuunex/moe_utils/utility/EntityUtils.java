@@ -2,8 +2,8 @@ package moe.kyuunex.moe_utils.utility;
 
 import java.util.List;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 
 public class EntityUtils {
     private static final List<EntityType<?>> collidable =

@@ -4,17 +4,17 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 import java.util.function.Predicate;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.screen.CraftingScreenHandler;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.world.inventory.CraftingMenu;
 
 /**
  * The type Inv utils.
  */
 public class InventoryUtils {
     public static final Predicate<ItemStack> IS_BLOCK =
-        (itemStack) -> Item.BLOCK_ITEMS.containsValue(itemStack.getItem());
+        (itemStack) -> Item.BY_BLOCK.containsValue(itemStack.getItem());
 
     /**
      * Swap slot.
@@ -23,10 +23,12 @@ public class InventoryUtils {
      * @param silent the silent
      */
     public static void swapSlot(int i, boolean silent) {
-        assert mc.player != null;
-        if (mc.player.getInventory().selectedSlot != i) {
-            if (!silent) mc.player.getInventory().selectedSlot = i;
-            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(i));
+        if (mc.player == null) return;
+        if (mc.getConnection() == null) return;
+
+        if (mc.player.getInventory().selected != i) {
+            if (!silent) mc.player.getInventory().selected = i;
+            mc.getConnection().getConnection().send(new ServerboundSetCarriedItemPacket(i), null, true);
         }
     }
 
@@ -38,7 +40,7 @@ public class InventoryUtils {
                  };
                  ref.i < 9;
                  ref.i++) {
-                if (mc.player.getInventory().getStack(getHotbarOffset() + ref.i).isEmpty()) {
+                if (mc.player.getInventory().getItem(getHotbarOffset() + ref.i).isEmpty()) {
                     return ref.i;
                 }
             }
@@ -48,9 +50,9 @@ public class InventoryUtils {
 
     public static int getInventoryOffset() {
         assert mc.player != null;
-        return mc.player.currentScreenHandler.slots.size() == 46
-            ? mc.player.currentScreenHandler instanceof CraftingScreenHandler ? 10 : 9
-            : mc.player.currentScreenHandler.slots.size() - 36;
+        return mc.player.containerMenu.slots.size() == 46
+            ? mc.player.containerMenu instanceof CraftingMenu ? 10 : 9
+            : mc.player.containerMenu.slots.size() - 36;
     }
 
     public static int getHotbarOffset() {

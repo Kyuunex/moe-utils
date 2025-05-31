@@ -19,7 +19,7 @@ public class PrinterUtils {
 
     @EventHandler
     private static void onTick(TickEvent.Pre event) {
-        if (mc.player == null || mc.world == null) return;
+        if (mc.player == null || mc.level == null) return;
 
         initFakePlayer();
     }
@@ -27,7 +27,7 @@ public class PrinterUtils {
 
     public static void initFakePlayer() {
         if (mc.player != null) {
-            if (fakePlayer == null || mc.player.clientWorld != fakePlayer.clientWorld) {
+            if (fakePlayer == null || mc.player.clientLevel != fakePlayer.clientLevel) {
                 fakePlayer = new FakePlayerEntity(mc.player, "~", 1000, false);
             }
         }
