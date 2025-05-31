@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
@@ -25,27 +24,30 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.PickFromInventoryC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.*;
+import net.minecraft.network.protocol.game.ServerboundPickItemPacket;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.util.Tuple;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 import moe.kyuunex.moe_utils.MoeUtils;
 import moe.kyuunex.moe_utils.utility.*;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 public class Printer extends Module {
     // Variables
-    public static BlockPos anchoringTo;
     private final SettingGroup sgDefault = settings.getDefaultGroup();
     public final Setting<Integer> swapDelay =
         sgDefault.add(
             new IntSetting.Builder()
                 .name("switch-delay")
                 .description("How long to wait before placing after switching.")
-                .defaultValue(4)
-                .sliderRange(2, 10)
+                .defaultValue(8)
+                .sliderRange(0, 20)
                 .build());
     public final Setting<Integer> range =
         sgDefault.add(
@@ -54,6 +56,14 @@ public class Printer extends Module {
                 .description("The range to place blocks.")
                 .defaultValue(3)
                 .sliderRange(1, 5)
+                .build());
+    public final Setting<Double> placeDistance =
+        sgDefault.add(
+            new DoubleSetting.Builder()
+                .name("place-distance")
+                .description("The max distance to place blocks.")
+                .defaultValue(3.75)
+                .sliderRange(3.2, 5.0)
                 .build());
     public final Setting<Integer> delay =
         sgDefault.add(
@@ -79,11 +89,20 @@ public class Printer extends Module {
                 .defaultValue(20)
                 .sliderRange(10, 80)
                 .build());
-    public final Setting<Boolean> raytraceCarpet =
+    // Grim makes me go loony -V
+    public final Setting<Boolean> iHateGrim =
         sgDefault.add(
             new BoolSetting.Builder()
-                .name("raytrace-carpet")
-                .description("Raytracing for carpet, is likely not needed and will decrease speed.")
+                .name("9b9t")
+                .description("Uses 9b9t specific placing.")
+                .defaultValue(false)
+                .build());
+    public final Setting<Boolean> raytracePartial =
+        sgDefault.add(
+            new BoolSetting.Builder()
+                .name("raytrace-partial")
+                .description("Raytracing for partial blocks (slabs, carpet, trapdoors, ect), is likely not needed and will decrease speed.")
+                .visible(() -> !iHateGrim.get())
                 .defaultValue(false)
                 .build());
     public final Setting<Boolean> raytraceFull =
@@ -91,6 +110,7 @@ public class Printer extends Module {
             new BoolSetting.Builder()
                 .name("raytrace-full")
                 .description("Raytracing for full-blocks, not required on grim.")
+                .visible(() -> !iHateGrim.get())
                 .defaultValue(true)
                 .build());
     public final Setting<SortAlgorithm> firstAlgorithm =
@@ -178,7 +198,7 @@ public class Printer extends Module {
     private final List<BlockPos> toSort = new ArrayList<>();
     private final List<Item> containedBlocks = new ArrayList<>();
     // Render
-    private final List<Pair<RenderWrap, BlockPos>> placeFading = new ArrayList<>();
+    private final List<Tuple<RenderWrap, BlockPos>> placeFading = new ArrayList<>();
     protected double renderOffset = 0;
     protected boolean isGoingUp = true;
     // Sleeping
@@ -206,13 +226,12 @@ public class Printer extends Module {
     public void onDeactivate() {
         placeFading.clear();
         toSort.clear();
-        anchoringTo = null;
-        mc.options.forwardKey.setPressed(false);
+        mc.options.keyUp.setDown(false);
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.player == null || mc.world == null || mc.interactionManager == null) {
+        if (mc.player == null || mc.level == null || mc.gameMode == null) {
             placeFading.clear();
             return;
         }
@@ -238,7 +257,7 @@ public class Printer extends Module {
 
         containedBlocks.clear();
 
-        for (ItemStack stack : mc.player.getInventory().main) {
+        for (ItemStack stack : mc.player.getInventory().items) {
             if (InventoryUtils.IS_BLOCK.test(stack)) {
                 containedBlocks.add(stack.getItem());
             }
@@ -247,13 +266,13 @@ public class Printer extends Module {
         placeFading.forEach(
             s -> {
                 if (renderModePlacing.get() == RenderMode.Breath) {
-                    s.getLeft().breath(s.getLeft().breath() - 1);
+                    s.getA().breath(s.getA().breath() - 1);
                 } else {
-                    s.getLeft().fadeTime(s.getLeft().fadeTime() - 1);
+                    s.getA().fadeTime(s.getA().fadeTime() - 1);
                 }
             });
         placeFading.removeIf(
-            s -> s.getLeft().fadeTime() <= 0 || s.getLeft().breath() * contraction.get() <= -1);
+            s -> s.getA().fadeTime() <= 0 || s.getA().breath() * contraction.get() <= -1);
 
         toSort.clear();
 
@@ -266,25 +285,29 @@ public class Printer extends Module {
                 (pos, blockState) -> {
                     BlockState required = worldSchematic.getBlockState(pos);
 
-                    if (mc.player.getBlockPos().isWithinDistance(pos, range.get())
-                        && blockState.isReplaceable()
+                    if (mc.player.blockPosition().closerThan(pos, range.get())
+                        && blockState.canBeReplaced()
                         && !required.isAir()
                         && blockState.getBlock() != required.getBlock()
                         && DataManager.getRenderLayerRange().isPositionWithinRange(pos)
                         && !mc.player
                         .getBoundingBox()
-                        .intersects(Vec3d.of(pos), Vec3d.of(pos).add(1, 1, 1))) {
+                        .intersects(Vec3.atLowerCornerOf(pos), Vec3.atLowerCornerOf(pos).add(1, 1, 1))) {
 
                         if ((containedBlocks.contains(required.getBlock().asItem()))) {
-                            boolean isCarpet =
-                                required.getBlock().asItem().getTranslationKey().endsWith("carpet");
-                            if (isCarpet) {
+                            if (iHateGrim.get()) {
                                 toSort.add(new BlockPos(pos));
                             } else {
-                                Map.Entry<Float, Float> rot = BlockUtils.getRotation(true, pos);
+                                boolean isPartialBlock = BlockUtils.getHeight(pos) < 0.6;
 
-                                if (BlockUtils.canRaycast(pos, rot.getValue(), rot.getKey())) {
+                                if (isPartialBlock && !raytracePartial.get()) {
                                     toSort.add(new BlockPos(pos));
+                                } else {
+                                    Map.Entry<Float, Float> rot = BlockUtils.getRotation(true, pos);
+
+                                    if (BlockUtils.canRaycast(pos, rot.getValue(), rot.getKey())) {
+                                        toSort.add(new BlockPos(pos));
+                                    }
                                 }
                             }
                         }
@@ -308,11 +331,6 @@ public class Printer extends Module {
                         if (Modules.get().get(AutoEat.class).eating
                             || Modules.get().get(AutoGap.class).isEating()
                             || Modules.get().get(KillAura.class).getTarget() != null) {
-                            MoeUtils.LOGGER.info(
-                                "Auto Eating: {}, Auto Gap Eating: {}, Kill Aura Target: {}",
-                                Modules.get().get(AutoEat.class).eating,
-                                Modules.get().get(AutoGap.class).isEating(),
-                                Modules.get().get(KillAura.class).getTarget() != null);
                             break;
                         }
 
@@ -320,7 +338,7 @@ public class Printer extends Module {
                             || placed >= blocksPerTick.get()
                             || blocksPlacedThisSec >= blocksPerSec.get()) break;
 
-                        if (!mc.player.getBlockPos().isWithinDistance(pos, range.get())) continue;
+                        if (!mc.player.blockPosition().closerThan(pos, range.get())) continue;
 
                         BlockState state = worldSchematic.getBlockState(pos);
                         Item item = state.getBlock().asItem();
@@ -331,34 +349,48 @@ public class Printer extends Module {
 
                         if (!itemResult.found()) continue;
 
-                        Hand hand = Hand.MAIN_HAND;
+                        InteractionHand hand = InteractionHand.MAIN_HAND;
 
-                        if (itemResult.isOffhand()) hand = Hand.OFF_HAND;
+                        if (itemResult.isOffhand()) hand = InteractionHand.OFF_HAND;
 
                         if (swapTimer > 0) {
                             swapTimer--;
                             break;
                         }
 
-                        if (((mc.player.getInventory().getMainHandStack().getItem() != item))
-                            && hand != Hand.OFF_HAND) {
+                        if (((mc.player.getInventory().getSelected().getItem() != item))
+                            && hand != InteractionHand.OFF_HAND) {
                             swapTimer = swapDelay.get();
                             if (itemResult.isHotbar()) {
                                 InventoryUtils.swapSlot(itemResult.slot(), false);
                             } else {
-                                InventoryUtils.swapSlot(InventoryUtils.findEmptySlotInHotbar(7), false);
-                                Objects.requireNonNull(mc.getNetworkHandler())
-                                    .sendPacket(new PickFromInventoryC2SPacket(itemResult.slot()));
+                                int emptySlot = InventoryUtils.findEmptySlotInHotbar(7);
+                                InventoryUtils.swapSlot(emptySlot, false);
+
+//                                mc.gameMode.handleInventoryMouseClick(
+//                                    mc.player.containerMenu.containerId,
+//                                    itemResult.slot(),
+//                                    emptySlot,
+//                                    ClickType.SWAP,
+//                                    mc.player
+//                                );
+
+                                if (mc.getConnection() == null) return;
+                                mc.getConnection().getConnection().send(
+                                    new ServerboundPickItemPacket(itemResult.slot()),
+                                    null,
+                                    true
+                                );
                             }
 
                             break;
                         }
 
-                        if (BlockUtils.canPlace(pos)) {
-                            if (BlockUtils.placeBlock(hand, itemResult, pos, tickTimestamp)) {
-                                if (placeFading.stream().noneMatch((pair) -> pair.getRight().equals(pos)))
+                        if (BlockUtils.canPlace(pos, placeDistance.get())) {
+                            if (BlockUtils.placeBlock(hand, pos, tickTimestamp)) {
+                                if (placeFading.stream().noneMatch((pair) -> pair.getB().equals(pos)))
                                     placeFading.add(
-                                        new Pair<>(new RenderWrap(fadeTime.get(), 0), new BlockPos(pos)));
+                                        new Tuple<>(new RenderWrap(fadeTime.get(), 0), new BlockPos(pos)));
                                 placeTimer = 0;
                                 placed++;
                                 blocksPlacedThisSec++;
@@ -378,15 +410,15 @@ public class Printer extends Module {
             s ->
                 renderBlock(
                     event.renderer,
-                    s.getRight().getX(),
-                    s.getRight().getY(),
-                    s.getRight().getZ(),
-                    s.getRight().getX() + 1,
-                    s.getRight().getY() + 1,
-                    s.getRight().getZ() + 1,
+                    s.getB().getX(),
+                    s.getB().getY(),
+                    s.getB().getZ(),
+                    s.getB().getX() + 1,
+                    s.getB().getY() + 1,
+                    s.getB().getZ() + 1,
                     RenderType.Placing,
                     renderModePlacing.get(),
-                    s.getLeft().breath()));
+                    s.getA().breath()));
     }
 
     public void renderingTick() {
@@ -476,8 +508,6 @@ public class Printer extends Module {
     @SuppressWarnings("unused")
     public enum SortAlgorithm {
         None(false, (a, b) -> 0),
-        TopDown(true, Comparator.comparingInt(value -> -value.getY())),
-        DownTop(true, Comparator.comparingInt(Vec3i::getY)),
         Closest(
             false,
             Comparator.comparingDouble(
@@ -487,19 +517,6 @@ public class Printer extends Module {
                         MeteorClient.mc.player.getX(),
                         MeteorClient.mc.player.getY(),
                         MeteorClient.mc.player.getZ(),
-                        value.getX() + 0.5,
-                        value.getY() + 0.5,
-                        value.getZ() + 0.5)
-                        : 0)),
-        ClosestToLastBlock(
-            false,
-            Comparator.comparingDouble(
-                value ->
-                    MeteorClient.mc.player != null
-                        ? Utils.squaredDistance(
-                        anchoringTo != null ? anchoringTo.getX() : MeteorClient.mc.player.getX(),
-                        anchoringTo != null ? anchoringTo.getY() : MeteorClient.mc.player.getY(),
-                        anchoringTo != null ? anchoringTo.getZ() : MeteorClient.mc.player.getZ(),
                         value.getX() + 0.5,
                         value.getY() + 0.5,
                         value.getZ() + 0.5)

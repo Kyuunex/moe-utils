@@ -3,14 +3,14 @@
   "id": "moe-utils",
   "version": "${version}",
   "name": "MoeUtils",
-  "description": "${description}",
+  "description": "Mapart utilities, featuring slimmed down edition of V's printer.",
   "authors": [
     "loli-tummy",
-    "kyuunex"
+    "Kyuunex"
   ],
   "contact": {
-    "email": "",
-    "repo": "https://github.com/kyuunex/moe-utils"
+    "email": "kyuunex@protonmail.ch",
+    "repo": "https://github.com/Kyuunex/moe-utils"
   },
   "icon": "assets/moe-utils/icon.png",
   "environment": "client",
@@ -22,13 +22,12 @@
   "mixins": [
     "litematica_moe-utils.mixins.json"
   ],
-  "accessWidener": "moe-utils.accesswidener",
   "custom": {
     "meteor-client:color": "225,25,25"
   },
   "depends": {
     "java": ">=21",
-    "minecraft": "${mc_version}",
+    "minecraft": ["1.21", "${mc_version}"],
     "meteor-client": "*"
   }
 }
