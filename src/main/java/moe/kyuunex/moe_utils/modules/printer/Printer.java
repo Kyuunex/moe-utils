@@ -254,7 +254,7 @@ public class Printer extends Module {
 
         containedBlocks.clear();
 
-        for (ItemStack stack : mc.player.getInventory().items) {
+        for (ItemStack stack : mc.player.getInventory().getNonEquipmentItems()) {
             if (InventoryUtils.IS_BLOCK.test(stack)) {
                 containedBlocks.add(stack.getItem());
             }
@@ -355,7 +355,7 @@ public class Printer extends Module {
                             break;
                         }
 
-                        if (((mc.player.getInventory().getSelected().getItem() != item))
+                        if (((mc.player.getInventory().getSelectedItem().getItem() != item))
                             && hand != InteractionHand.OFF_HAND) {
                             swapTimer = swapDelay.get();
                             if (itemResult.isHotbar()) {

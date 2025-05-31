@@ -26,8 +26,8 @@ public class InventoryUtils {
         if (mc.player == null) return;
         if (mc.getConnection() == null) return;
 
-        if (mc.player.getInventory().selected != i) {
-            if (!silent) mc.player.getInventory().selected = i;
+        if (mc.player.getInventory().getSelectedSlot() != i) {
+            if (!silent) mc.player.getInventory().setSelectedSlot(i);
             mc.getConnection().getConnection().send(new ServerboundSetCarriedItemPacket(i), null, true);
         }
     }

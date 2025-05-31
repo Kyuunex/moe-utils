@@ -2,6 +2,7 @@
 Mapart related utilities for Minecraft (as a Meteor Client Addon)
 
 ### Versions (check branches)
+- 1.21.5
 - 1.21.4
 - 1.21.3
 - 1.21.1
