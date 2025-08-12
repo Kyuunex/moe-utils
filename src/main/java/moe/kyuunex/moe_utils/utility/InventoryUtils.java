@@ -32,20 +32,14 @@ public class InventoryUtils {
         }
     }
 
-    public static int findEmptySlotInHotbar(int i) {
-        if (mc.player != null) {
-            for (var ref =
-                 new Object() {
-                     int i = 0;
-                 };
-                 ref.i < 9;
-                 ref.i++) {
-                if (mc.player.getInventory().getItem(getHotbarOffset() + ref.i).isEmpty()) {
-                    return ref.i;
-                }
-            }
+    public static int findEmptySlotInHotbar(int preferred) {
+        if (mc.player == null) return preferred;
+        if (mc.player.getInventory().getItem(preferred).isEmpty()) return preferred;
+
+        for (int i = 0; i < 9; i++) {
+            if (mc.player.getInventory().getItem(i).isEmpty()) return i;
         }
-        return i;
+        return preferred;
     }
 
     public static int getInventoryOffset() {
