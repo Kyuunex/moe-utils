@@ -46,6 +46,14 @@ public class Printer extends Module {
                 .defaultValue(8)
                 .sliderRange(0, 20)
                 .build());
+    public final Setting<Integer> dedicatedSlot =
+        sgDefault.add(
+            new IntSetting.Builder()
+                .name("dedicated-slot")
+                .description("The hotbar slot to use for blocks.")
+                .defaultValue(7)
+                .sliderRange(0, 8)
+                .build());
     public final Setting<Integer> range =
         sgDefault.add(
             new IntSetting.Builder()
@@ -361,7 +369,7 @@ public class Printer extends Module {
                             if (itemResult.isHotbar()) {
                                 InventoryUtils.swapSlot(itemResult.slot(), false);
                             } else {
-                                int emptySlot = InventoryUtils.findEmptySlotInHotbar(7);
+                                int emptySlot = InventoryUtils.findEmptySlotInHotbar(dedicatedSlot.get());
                                 InventoryUtils.swapSlot(emptySlot, false);
 
                                 mc.gameMode.handleInventoryMouseClick(
