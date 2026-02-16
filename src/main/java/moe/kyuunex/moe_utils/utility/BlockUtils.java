@@ -235,7 +235,7 @@ public class BlockUtils {
     }
 
     public static double getHeight(BlockPos pos) {
-        return mc.player.clientLevel.getBlockState(pos).getCollisionShape(mc.player.clientLevel, pos).max(Direction.Axis.Y);
+        return mc.level.getBlockState(pos).getCollisionShape(mc.level, pos).max(Direction.Axis.Y);
     }
 
     public static BlockHitResult getSafeHitResult(BlockPos pos) {

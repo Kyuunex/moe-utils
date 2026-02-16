@@ -1,19 +1,14 @@
 # Moe Utils
 Mapart related utilities for Minecraft (as a Meteor Client Addon)
 
-### Versions (check branches)
-- 1.21.8
-- 1.21.5
+### Supported versions (check branches)
+- 1.21.11
 - 1.21.4
-- 1.21.3
-- 1.21.1
-- 1.21
-- 1.20.6
 
 Get automatic builds [here](https://github.com/Kyuunex/moe-utils/releases)
 
 ### Modules
-+ Slimmed down version of V's printer.
++ Mapart printer (forked from Vali's)
 + Map area highlighter. 
 + Keep Schematic Loaded. Prevents Litematica from unloading the parts of the schematic when you are too far away.
 
@@ -21,10 +16,7 @@ Get automatic builds [here](https://github.com/Kyuunex/moe-utils/releases)
 + `quicksave-map` quickly saves a map you are holding, locally.
 
 ### Note
-The printer is an older version and is stripped down to basics. No movement logic. Don't ask for support.  
-Also, if the server checks rotations (e.g. with Grim), you're gonna have a bad time. 
-I maintain this printer with const/9b in mind.  
-Some servers also may have strict checks with inventory stuff.
+This printer is maintained with 9b9t and Constantiam in mind.
 
 ### Required mods
 + Litematica

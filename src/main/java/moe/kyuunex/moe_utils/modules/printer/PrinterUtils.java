@@ -27,7 +27,7 @@ public class PrinterUtils {
 
     public static void initFakePlayer() {
         if (mc.player != null) {
-            if (fakePlayer == null || mc.player.clientLevel != fakePlayer.clientLevel) {
+            if (fakePlayer == null || mc.level != fakePlayer.level()) {
                 fakePlayer = new FakePlayerEntity(mc.player, "~", 1000, false);
             }
         }

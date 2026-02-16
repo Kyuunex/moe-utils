@@ -3,9 +3,8 @@
   "id": "moe-utils",
   "version": "${version}",
   "name": "MoeUtils",
-  "description": "Mapart utilities, featuring slimmed down edition of V's printer.",
+  "description": "Mapart utilities, with a printer forked from Vali's.",
   "authors": [
-    "loli-tummy",
     "Kyuunex"
   ],
   "contact": {
