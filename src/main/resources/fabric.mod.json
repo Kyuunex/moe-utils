@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "moe-utils",
   "version": "${version}",
-  "name": "MoeUtils",
-  "description": "Mapart utilities, with a printer forked from Vali's.",
+  "name": "Moe Utils",
+  "description": "Minecraft mapart utilities, with a printer forked from Vali's.",
   "authors": [
     "Kyuunex"
   ],
@@ -11,18 +11,18 @@
     "email": "kyuunex@protonmail.ch",
     "repo": "https://github.com/Kyuunex/moe-utils"
   },
-  "icon": "assets/moe-utils/icon.png",
+  "icon": "assets/icon.png",
   "environment": "client",
   "entrypoints": {
     "meteor": [
-      "moe.kyuunex.moe_utils.MoeUtils"
+      "moe.utils.MoeUtils"
     ]
   },
   "mixins": [
     "litematica_moe-utils.mixins.json"
   ],
   "custom": {
-    "meteor-client:color": "225,25,25"
+    "meteor-client:color": "147,244,249"
   },
   "depends": {
     "java": ">=21",

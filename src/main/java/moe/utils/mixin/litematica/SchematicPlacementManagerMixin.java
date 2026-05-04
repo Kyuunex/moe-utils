@@ -1,8 +1,8 @@
-package moe.kyuunex.moe_utils.mixin.litematica;
+package moe.utils.mixin.litematica;
 
 import fi.dy.masa.litematica.config.Configs;
 import fi.dy.masa.litematica.schematic.placement.SchematicPlacementManager;
-import moe.kyuunex.moe_utils.modules.KeepSchematicLoaded;
+import moe.utils.modules.LoadEntireSchematics;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,6 +15,9 @@ public class SchematicPlacementManagerMixin {
             at = @At(
                     value = "HEAD"))
     public void chunkUnloadPatcher(int chunkX, int chunkZ, CallbackInfo ci) {
-        Configs.Generic.LOAD_ENTIRE_SCHEMATICS.setBooleanValue(Modules.get().get(KeepSchematicLoaded.class).isActive());
+        LoadEntireSchematics moduleToggle = Modules.get().get(LoadEntireSchematics.class);
+        if (moduleToggle != null) {
+            Configs.Generic.LOAD_ENTIRE_SCHEMATICS.setBooleanValue(moduleToggle.isActive());
+        }
     }
 }
