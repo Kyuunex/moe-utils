@@ -176,14 +176,14 @@ public class Printer extends Module {
     );
 
     // Color Swapping
-    private final SettingGroup sgColorSwapping = settings.createGroup("Color Swapping");
-    public final Setting<Boolean> strictNoColor = sgColorSwapping.add(new BoolSetting.Builder()
-        .name("strict-no-color")
-        .description("Prevents using color swapping at all.")
-        .defaultValue(true)
+    private final SettingGroup sgBlockSwapping = settings.createGroup("Block Swapping (broken)");
+    public final Setting<Boolean> blockSwapping = sgBlockSwapping.add(new BoolSetting.Builder()
+        .name("block-swapping")
+        .description("Swap blocks with ones that are same color.")
+        .defaultValue(false)
         .build()
     );
-    public final Setting<List<Block>> blockExclusion = sgColorSwapping.add(new BlockListSetting.Builder()
+    public final Setting<List<Block>> blockExclusion = sgBlockSwapping.add(new BlockListSetting.Builder()
         .name("block-exclusion")
         .description("Excludes blocks.")
         .build()
@@ -661,7 +661,7 @@ public class Printer extends Module {
 
         for (ItemStack stack : mc.player.getInventory().getNonEquipmentItems()) {
             if (InventoryUtils.IS_BLOCK.test(stack)) {
-                if (strictNoColor.get()) {
+                if (!blockSwapping.get()) {
                     containedBlocks.add(stack.getItem());
                 } else if (blockExclusion.get().stream().noneMatch((block -> stack.getItem() == block.asItem()))) {
                     containedColors.add(McDataCache.getColor(stack));
@@ -859,10 +859,10 @@ public class Printer extends Module {
 
                                 if (blockState.isAir() && !required.isAir()
                                     && !BlockUtils.hasEntitiesInside(srcBlock)) {
-                                    return ((!strictNoColor.get()
+                                    return ((blockSwapping.get()
                                         && containedColors.contains(
                                         McDataCache.getColor(required.getBlock().asItem())))
-                                        || (strictNoColor.get()
+                                        || (!blockSwapping.get()
                                         && containedBlocks.contains(required.getBlock().asItem())))
                                         && !isDiffered(srcBlock);
                                 }

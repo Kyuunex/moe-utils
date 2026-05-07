@@ -103,10 +103,10 @@ public class PlacingManager {
                     .getBoundingBox()
                     .intersects(srcBlock.getCenter(), srcBlock.getCenter().add(1, 1, 1))) {
 
-                    return (!PrinterUtils.PRINTER.strictNoColor.get()
+                    return (PrinterUtils.PRINTER.blockSwapping.get()
                         && PrinterUtils.PRINTER.containedColors.contains(
                         McDataCache.getColor(required.getBlock().asItem())))
-                        || (PrinterUtils.PRINTER.strictNoColor.get()
+                        || (!PrinterUtils.PRINTER.blockSwapping.get()
                         && PrinterUtils.PRINTER.containedBlocks.contains(
                         required.getBlock().asItem()));
                 }
@@ -157,7 +157,7 @@ public class PlacingManager {
             FindItemResult itemResult =
                 InvUtils.find(
                     (stack) ->
-                        PrinterUtils.PRINTER.strictNoColor.get()
+                        !PrinterUtils.PRINTER.blockSwapping.get()
                             ? stack.getItem() == item
                             : McDataCache.getColor(stack) == McDataCache.getColor(item)
                                 && PrinterUtils.PRINTER.blockExclusion.get().stream()
@@ -178,10 +178,10 @@ public class PlacingManager {
                 break;
             }
 
-            if ((!PrinterUtils.PRINTER.strictNoColor.get()
+            if ((PrinterUtils.PRINTER.blockSwapping.get()
                 && McDataCache.getColor(mc.player.getMainHandItem())
                 != McDataCache.getColor(item)
-                || (PrinterUtils.PRINTER.strictNoColor.get()
+                || (!PrinterUtils.PRINTER.blockSwapping.get()
                 && mc.player.getMainHandItem().getItem() != item))
                 && hand != InteractionHand.OFF_HAND) {
                 PrinterUtils.PRINTER.swapTimer = PrinterUtils.PRINTER.swapDelay.get();
@@ -239,7 +239,7 @@ public class PlacingManager {
             FindItemResult itemResult =
                 InvUtils.find(
                     (stack) ->
-                        PrinterUtils.PRINTER.strictNoColor.get()
+                        !PrinterUtils.PRINTER.blockSwapping.get()
                             ? stack.getItem() == item
                             : McDataCache.getColor(stack) == McDataCache.getColor(item)
                                 && PrinterUtils.PRINTER.blockExclusion.get().stream()
@@ -260,10 +260,10 @@ public class PlacingManager {
                 break;
             }
 
-            if ((!PrinterUtils.PRINTER.strictNoColor.get()
+            if ((PrinterUtils.PRINTER.blockSwapping.get()
                 && McDataCache.getColor(mc.player.getMainHandItem())
                 != McDataCache.getColor(item)
-                || (PrinterUtils.PRINTER.strictNoColor.get()
+                || (!PrinterUtils.PRINTER.blockSwapping.get()
                 && mc.player.getMainHandItem().getItem() != item))
                 && hand != InteractionHand.OFF_HAND) {
                 PrinterUtils.PRINTER.swapTimer = PrinterUtils.PRINTER.swapDelay.get();
