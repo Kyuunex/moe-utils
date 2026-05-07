@@ -1,6 +1,8 @@
-package moe.kyuunex.moe_utils.utility;
+package moe.utils.utility.render;
+
 
 public class RenderWrap {
+
     private int fadeTime;
     private int breath;
 
@@ -24,4 +26,5 @@ public class RenderWrap {
     public void breath(int breath) {
         this.breath = breath;
     }
+
 }

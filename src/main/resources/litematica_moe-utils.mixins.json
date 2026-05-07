@@ -1,13 +1,13 @@
 {
   "required": false,
-  "package": "moe.kyuunex.moe_utils.mixin.litematica",
+  "package": "moe.utils.mixin.litematica",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "SchematicPlacementManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
-    "SchematicPlacementManagerMixin"
   ]
 }

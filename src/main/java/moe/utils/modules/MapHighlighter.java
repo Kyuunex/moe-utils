@@ -1,6 +1,6 @@
-package moe.kyuunex.moe_utils.modules;
+package moe.utils.modules;
 
-import moe.kyuunex.moe_utils.MoeUtils;
+import moe.utils.MoeUtils;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.ColorSetting;

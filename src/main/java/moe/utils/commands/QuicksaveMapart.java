@@ -1,4 +1,4 @@
-package moe.kyuunex.moe_utils.commands;
+package moe.utils.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
