@@ -2,22 +2,33 @@ name: Publish Development Build
 on: push
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            -   uses: actions/checkout@v2
-            -   uses: actions/setup-java@v2
-                with:
-                    java-version: 21
-                    distribution: adopt
-            -   name: Build
-                run: ./gradlew build
-            -   name: Release
-                uses: marvinpinto/action-automatic-releases@latest
-                with:
-                    repo_token: '${{ secrets.GITHUB_TOKEN }}'
-                    automatic_release_tag: devbuild-1.21.11
-                    prerelease: false
-                    title: Dev Build (1.21.11)
-                    files: |
-                        ./build/libs/*.jar
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: 25
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: devbuild-26.2
+          name: Dev Build (26.2)
+          prerelease: true
+          files: |
+            ./build/libs/*.jar
