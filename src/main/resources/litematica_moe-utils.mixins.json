@@ -1,7 +1,7 @@
 {
   "required": false,
-  "package": "moe.utils.mixin.litematica",
-  "compatibilityLevel": "JAVA_21",
+  "package": "sh.qnx.moe.mixin.litematica",
+  "compatibilityLevel": "JAVA_25",
   "client": [
     "SchematicPlacementManagerMixin"
   ],
