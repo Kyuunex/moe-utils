@@ -5,17 +5,16 @@
   "name": "Moe Utils",
   "description": "Minecraft mapart utilities, with a printer forked from Vali's.",
   "authors": [
-    "Kyuunex"
+    "qnx"
   ],
   "contact": {
-    "email": "kyuunex@protonmail.ch",
-    "repo": "https://github.com/Kyuunex/moe-utils"
+    "source": "https://github.com/qnxt/moe-utils"
   },
   "icon": "assets/icon.png",
   "environment": "client",
   "entrypoints": {
     "meteor": [
-      "moe.utils.MoeUtils"
+      "sh.qnx.moe.MoeUtils"
     ]
   },
   "mixins": [
@@ -26,7 +25,7 @@
   },
   "depends": {
     "java": ">=21",
-    "minecraft": "${mc_version}",
+    "minecraft": "${version}",
     "meteor-client": "*"
   }
 }
