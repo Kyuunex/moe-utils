@@ -3,7 +3,7 @@ Mapart related utilities for Minecraft (as a Meteor Client Addon).
 Printer recently updated with movement logic!
 
 ### Supported versions
-- 1.21.11
+- 26.2
 - 1.21.4
 
 Get automatic builds [here](https://github.com/Kyuunex/moe-utils/releases)
